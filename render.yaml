@@ -1,0 +1,35 @@
+# Render Blueprint (blueprint.render.com) — deploy as a background worker.
+# The bot is a long-running polling process (no HTTP listener), so it is a
+# `worker` service, not a `web` service. Health is verified via service logs.
+#
+# The application ships as an ENCRYPTED launcher (main.py). It only runs when
+# the secret HOSTING_APP_KEY is provided; without it the process refuses to
+# start ("ACCESS DENIED").
+#
+# Secrets (HOSTING_APP_KEY, HOSTING_BOT_TOKEN, HOSTING_TIDB_DSNS, ...) are
+# marked `sync: false` and MUST be set manually in the Render dashboard after
+# deploy — nothing here contains real credentials.
+
+services:
+  - type: worker
+    name: vps-hosting-panel
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    autoDeploy: true
+    envVars:
+      - key: HOSTING_APP_KEY
+        sync: false
+      - key: HOSTING_BOT_TOKEN
+        sync: false
+      - key: HOSTING_OWNER_ID
+        sync: false
+      - key: HOSTING_DB_DRIVER
+        value: tidb
+      - key: HOSTING_TIDB_DSNS
+        sync: false
+      - key: HOSTING_SUB_LINK
+        sync: false
+      - key: HOST_URL
+        sync: false
